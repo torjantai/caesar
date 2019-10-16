@@ -1,10 +1,19 @@
+
+export const transpose = (alphapet: string[]) => (delta: number, char: string): string => {
+    const transposeLookUp = [...alphapet, ...alphapet];
+    const index = transposeLookUp.lastIndexOf(char.toLowerCase());
+    if (index < 0) return char;
+    const newIndex = index - delta;
+    const newChar = transposeLookUp[newIndex];
+    return newChar;
+}
+
+
+
 const decipher = (alphapet: string[]) => (cipherText: string) => (shift: number): string => {
     const cipherTextArray: string[] = Array.from(cipherText);
     const decipherTextArray = cipherTextArray.map((char) => {
-        if (!alphapet.includes(char)) return char;
-        const index = alphapet.indexOf(char);
-        const newChar = index + shift < alphapet.length -1 ? index + shift : index + shift - alphapet.length - 1 
-        return alphapet[newChar];
+        return transpose(alphapet)(shift, char);
     })
     return decipherTextArray.join('');
 }

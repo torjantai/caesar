@@ -2,26 +2,33 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import getBullshits from './getBullshits';
-import decipher from './decipher';
+import decipher, { transpose } from './decipher';
 
 const alphapet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'å', 'ä', 'ö'];
 console.log(alphapet.length)
 const clearText = decipher(alphapet);
 
-const bs = getBullshits().bullshits.slice(0, 5);
+const transTest = transpose(alphapet)(29, 'a');
+console.log('test', transTest);
+
+const bs = getBullshits().bullshits.slice(0, 10);
 console.log(bs);
 
-const decipherMessages = bs.map(row => {
-  return clearText(row.message);
-})
+const results = alphapet.map((char, index) => clearText(bs[5].message)(index))
+console.log(results);
 
-console.log(decipherMessages);
 
-const qwer = alphapet.map((value, index) => {
-  return decipherMessages.map(fn => fn(index))
-});
 
-console.log(qwer);
+
+
+
+const word = 'bouuj';
+const antti = clearText(word)(1);
+console.log(antti);
+
+
+
+
 
 function App() {
   return (
