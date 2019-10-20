@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import getBullshits from './getBullshits';
 import decipher from './decipher';
+import { number } from 'prop-types';
 
 const alphapet = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
@@ -15,10 +16,6 @@ const clearText = decipher(alphapet);
 
 const bs = getBullshits().bullshits.slice();
 // console.log(bs);
-
-// 
-const results = alphapet.map((_, index) => clearText(bs[10].message)(index));
-console.log(results);
 
 // discard sentences that contain any obviously impossible runs like 'zxcv'
 
@@ -47,20 +44,44 @@ const countFinnish = count(alphapet);
 
 const calcFitness = (countFn: (arr: string[]) => number[]) => (referenceFreqArr: number[]) => (sentence: string) => {
     const sentenceArray = Array.from(sentence);
-    // console.log(sentenceArray);
+    const expected = referenceFreqArr.map(freq => freq * sentenceArray.length);
     const counts = countFn(sentenceArray);
-    const total = counts.reduce((acc, cur) => acc + cur);
-    const persentages = counts.map(count => count / total);
-    const diffs = persentages.map((persentage, index) => Math.abs(persentage - referenceFreqArr[index]));
-    const diffSum = diffs.reduce((acc, cur) => acc + cur);
-    // console.log(counts, persentages, diffs);
-    return diffSum;
+    const chiSquares = counts.map((count, i) => {
+        const e = expected[i];
+        if (e === 0) return 0;
+        return Math.pow((count - e), 2) / e;
+    });
+    const sum = chiSquares.reduce((acc, cur) => acc + cur);
+    // console.log('exp\n', expected, 'counts\n', counts, 'chiSquares\n', chiSquares, sum);
+    return sum;
 }
 
 
 const fitness = calcFitness(countFinnish)(persentages);
-const points = results.map(fitness);
-console.log(points);
+
+const getFittestDecipher = (ciphertext: string) => {
+    const asdt = clearText(ciphertext);
+    const deciphers = alphapet.map((_, i) => asdt(i));
+    // console.log(deciphers);
+    const fitnesses = deciphers.map(decipher => fitness(decipher));
+    // find the lowest in fitnesses and return matching dehiphers
+    // console.log(fitnesses);
+    const fittestIndex = fitnesses.reduce((acc, cur, i) => {
+        if (cur < acc.value) {
+            acc.value = cur;
+            acc.index = i;
+        }
+        return acc;
+    }, { value: Number.MAX_SAFE_INTEGER, index: -1 });
+    // console.log(fittestIndex);
+    return {
+        result: deciphers[fittestIndex.index],
+        fitness: fittestIndex.value,
+    };
+}
+
+const all = bs.map(row => getFittestDecipher(row.message));
+console.log(JSON.stringify(all, null, 2));
 
 
 
